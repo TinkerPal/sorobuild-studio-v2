@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import { Code1, CloseCircle, PlayCircle } from "iconsax-react";
 import { X } from "lucide-react";
+import { useStates } from "../../../contexts/StatesContext";
 
 import {
   getScriptHelp,
@@ -278,6 +279,7 @@ export default function ScriptEditorModal({
   onApply,
 }) {
   const [script, setScript] = useState("");
+  const { selectedTab } = useStates();
 
   const [error, setError] = useState("failed");
   const [preview, setPreview] = useState(null);
@@ -361,7 +363,7 @@ export default function ScriptEditorModal({
     try {
       const currentScript = getCurrentScript();
       const result = runUserScript(currentScript, context);
-      runBuilderScript(script);
+      runBuilderScript(script, selectedTab);
 
       validateShape(result);
       setScript(currentScript);
@@ -377,7 +379,7 @@ export default function ScriptEditorModal({
     try {
       const currentScript = getCurrentScript();
       const result = runUserScript(currentScript, context);
-      const readableOperations = runBuilderScript(currentScript);
+      const readableOperations = runBuilderScript(currentScript, selectedTab);
 
       validateShape(result);
       setScript(currentScript);

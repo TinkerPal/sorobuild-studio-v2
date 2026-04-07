@@ -1259,7 +1259,8 @@ function createWrappedOperation(Operation, capturedOperations) {
   return WrappedOperation;
 }
 
-export function runBuilderScript(script) {
+export function runBuilderScript(script, tab) {
+  if (tab !== "builder") return;
   const capturedOperations = [];
 
   const WrappedOperation = createWrappedOperation(

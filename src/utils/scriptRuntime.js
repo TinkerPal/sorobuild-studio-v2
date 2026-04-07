@@ -44,7 +44,7 @@ export function createScriptApi(context = {}) {
   };
 }
 
-function stripEditorOnlyImports(source) {
+export function stripEditorOnlyImports(source) {
   return source
     .replace(
       /^\s*import\s+\*\s+as\s+([A-Za-z_$][\w$]*)\s+from\s+["']@stellar\/stellar-sdk["'];?\s*$/gm,
