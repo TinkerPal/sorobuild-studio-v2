@@ -362,7 +362,8 @@ operations = [
       const response = await sendTransactionMainnet(
         signedTx,
         network,
-        "classic"
+        userKey,
+        "asset_ops"
       );
 
       if (response) {

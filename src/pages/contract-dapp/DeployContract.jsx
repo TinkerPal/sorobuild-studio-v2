@@ -133,8 +133,6 @@ ${args
   function handleApplyConstructorScript(result, script) {
     setConstructorScript(script);
 
-    console.log("the constructor script is", script);
-    console.log("the result value", result?.value);
     setScriptArgs(Array.isArray(result?.value) ? result.value : []);
   }
 
@@ -166,7 +164,7 @@ ${args
       network
     );
 
-    return submitLoadContract(signedTx, network);
+    return submitLoadContract(signedTx, network, userKey);
   }
 
   async function createContract(wasm, constructorArgsXdr) {
@@ -176,7 +174,7 @@ ${args
       network,
       constructorArgsXdr
     );
-    return sendTransactionMainnet(signedTx, network);
+    return sendTransactionMainnet(signedTx, network, userKey, "deploy");
   }
 
   async function handleCreateContract(e) {

@@ -374,13 +374,21 @@ export async function prepareTransactionMainnet(tx) {
   }
 }
 
-export async function sendTransactionMainnet(signedTx, network, type = null) {
+export async function sendTransactionMainnet(
+  signedTx,
+  network,
+  pubKey = null,
+  action = null,
+  type = null
+) {
   try {
     const response = await axios.post(
       `${STELLAR_SDK_SERVER_URL}/send-transaction`,
       {
+        pubKey,
         signedTx: signedTx,
         network: network?.network,
+        action,
         type,
       }
     );
@@ -394,13 +402,15 @@ export async function sendTransactionMainnet(signedTx, network, type = null) {
   }
 }
 
-export async function submitLoadContract(signedTx, network) {
+export async function submitLoadContract(signedTx, network, pubKey = null) {
   try {
     const response = await axios.post(
       `${STELLAR_SDK_SERVER_URL}/send-transaction`,
       {
+        pubKey: pubKey,
         signedTx: signedTx,
         network: network?.network,
+        action: "upload",
       }
     );
 

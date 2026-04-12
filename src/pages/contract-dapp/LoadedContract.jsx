@@ -185,7 +185,12 @@ export default function LoadedContract() {
         return;
       }
 
-      const res = await sendTransactionMainnet(signedTx, network);
+      const res = await sendTransactionMainnet(
+        signedTx,
+        network,
+        userKey,
+        "invoke"
+      );
       setOutputs(res || null);
       setShowOutputModal(true);
       showSuccessToast("Contract invoked successfully");
@@ -523,7 +528,7 @@ function ArgumentRow({
       <div className="md:w-1/4">
         <SelectField
           isDisabled={true}
-          label="Type"
+          label={arg?.name}
           value={arg.type}
           onChange={(val) => onTypeChange(arg.id, val)}
           options={typeOptions}
