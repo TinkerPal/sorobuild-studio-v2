@@ -400,6 +400,7 @@ export async function sendTransactionMainnet(
       "Error sending transaction:",
       error.response ? error.response.data : error.message
     );
+    showErrorToast(error.response ? error.response.data : error.message);
   }
 }
 
