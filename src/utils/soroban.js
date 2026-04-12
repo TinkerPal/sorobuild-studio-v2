@@ -24,6 +24,7 @@ import {
 
 import { showErrorToast } from "../components/ToastComponent";
 import { WalletKitService } from "../wallet-kit/services/global-service";
+import { toast } from "sonner";
 
 export const BASE_FEE = "100";
 
@@ -560,6 +561,7 @@ export async function anyTransactionBuilder(pubKey, network, operationsXdr) {
       "Error sending transaction:",
       error.response ? error.response.data : error.message
     );
+    showErrorToast(error.response ? error.response.data : error.message);
   }
 }
 
@@ -649,6 +651,7 @@ export async function anyInvoke(
       "Error sending transaction:",
       error.response ? error.response.data : error.message
     );
+    showErrorToast(error.response ? error.response.data : error.message);
   }
 }
 
