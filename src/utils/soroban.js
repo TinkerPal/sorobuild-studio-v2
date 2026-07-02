@@ -396,6 +396,7 @@ export async function sendTransactionMainnet(
 
     return response.data.data;
   } catch (error) {
+    console.log("the rerro is", error);
     console.error(
       "Error sending transaction:",
       error.response ? error.response.data : error.message
@@ -532,6 +533,7 @@ export async function createContractMainnet(
       "Error sending transaction:",
       error.response ? error.response.data : error.message
     );
+    // showErrorToast(error.response ? error.response.data : error.message);
   }
 }
 export async function anyTransactionBuilder(pubKey, network, operationsXdr) {

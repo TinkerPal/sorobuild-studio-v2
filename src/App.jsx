@@ -18,6 +18,7 @@ import LoadContract from "./pages/contract-dapp/LoadContract";
 import ClassicTools from "./pages/contract-dapp/ClassicTools";
 
 import TransactionBuilderFeature from "./pages/contract-dapp/TransactionBuilderFeature";
+import AccountDemolisher from "./pages/contract-dapp/AccountDemolisher";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
                 <Route path="deploy" element={<DeployContract />} />
                 <Route path="asset" element={<ClassicTools />} />
                 <Route path="builder" element={<TransactionBuilderFeature />} />
+                <Route path="demolisher" element={<AccountDemolisher />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />

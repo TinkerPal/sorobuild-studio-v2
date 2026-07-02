@@ -265,44 +265,88 @@ export default function LoadedContract() {
     setScriptArgs(Array.isArray(result?.value) ? result.value : []);
   }
 
+  function buildScValScript(value, type) {
+    const normalizedType = normalizeScValType(type);
+
+    if (normalizedType === "bytes") {
+      return `bytes(${JSON.stringify(value || "")})`;
+    }
+
+    return `nativeToScVal(${formatNativeValue(
+      value,
+      normalizedType
+    )}, { type: "${normalizedType}" })`;
+  }
+
+  function normalizeScValType(type = "") {
+    const map = {
+      Address: "address",
+      address: "address",
+      String: "string",
+      string: "string",
+      Symbol: "symbol",
+      symbol: "symbol",
+      Bool: "bool",
+      bool: "bool",
+      i128: "i128",
+      I128: "i128",
+      u128: "u128",
+      U128: "u128",
+      i64: "i64",
+      I64: "i64",
+      u64: "u64",
+      U64: "u64",
+      i32: "i32",
+      I32: "i32",
+      u32: "u32",
+      U32: "u32",
+      bytes: "bytes",
+      Bytes: "bytes",
+    };
+
+    return map[type] || String(type).toLowerCase();
+  }
+
+  function formatNativeValue(value, type) {
+    const isEmpty = value === "" || value === null || value === undefined;
+
+    if (isEmpty) {
+      return '""';
+    }
+
+    if (["i128", "u128", "i64", "u64"].includes(type)) {
+      return `${value}n`;
+    }
+
+    if (["i32", "u32"].includes(type)) {
+      return String(value);
+    }
+
+    if (type === "bool") {
+      return value === true || value === "true" ? "true" : "false";
+    }
+
+    return JSON.stringify(value);
+  }
+
   function getInvokeScriptInitialValue() {
     if (invokeScript?.trim()) return invokeScript;
 
     if (args.length > 0) {
-      return `args = [
-${args
-  .map(
-    (arg) => `  {
-    id: ${JSON.stringify(arg.id)},
-    name: ${JSON.stringify(arg.name)},
-    type: ${JSON.stringify(arg.type)},
-    value: ${formatScriptValue(arg.value, arg.type)}
-  }`
-  )
-  .join(",\n")}
-];`;
+      return `
+  args = [
+  ${args.map((arg) => `  ${buildScValScript(arg.value, arg.type)}`).join(",\n")}
+  ];`;
     }
 
-    return `args = [
-  {
-    id: "1",
-    name: "to",
-    type: "Address",
-    value: "GC4O26MXQN72WX5SG7BOIV2N72RVDOLXN33BJFDJW3RS3FEBMRXPD56U"
-  },
-  {
-    id: "2",
-    name: "amount",
-    type: "i128",
-    value: "1000"
-  },
-  {
-    id: "3",
-    name: "enabled",
-    type: "bool",
-    value: true
-  }
-];`;
+    return `
+  args = [
+    nativeToScVal("GC4O26MXQN72WX5SG7BOIV2N72RVDOLXN33BJFDJW3RS3FEBMRXPD56U", {
+      type: "address",
+    }),
+    nativeToScVal(1000n, { type: "i128" }),
+    nativeToScVal(true, { type: "bool" }),
+  ];`;
   }
 
   const hasArgs = args?.length > 0;

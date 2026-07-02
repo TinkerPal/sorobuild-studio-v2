@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from "react";
-// import {
-//   LedgerService,
-//   LobstrExtensionService,
-//   ModalService,
-//   ToastService,
-//   WalletConnectService,
-//   WalletKitService,
-// } from "services/globalServices";
-
 import { WalletKitService } from "./services/global-service";
-import { LoginTypes } from "./login-types";
 import { useStates } from "../contexts/StatesContext";
 
 export default function WalletKitModal() {
   const [isAvailableMap, setIsAvailableMap] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
 
-  const { walletKitIsOpen, setWalletKitIsOpen } = useStates();
+  const {
+    walletKitIsOpen,
+    setWalletKitIsOpen,
+    setUserKey,
+    setNetwork,
+
+    walletApp,
+    setWalletApp,
+  } = useStates();
   const stellarWalletKitOptions = WalletKitService.walletKit.modules;
 
   useEffect(() => {
@@ -23,55 +23,47 @@ export default function WalletKitModal() {
       stellarWalletKitOptions.map(({ isAvailable }) => isAvailable())
     ).then((results) => {
       const map = new Map();
-
       results.forEach((isAvailable, index) => {
         map.set(stellarWalletKitOptions[index].productName, isAvailable);
       });
-
       setIsAvailableMap(map);
     });
   }, [stellarWalletKitOptions]);
 
-  const openHandler = () => {
-    setWalletKitIsOpen(true); // Set modal to open
-  };
+  // Mount and show modal
+  useEffect(() => {
+    if (walletKitIsOpen) {
+      setShouldRender(true);
+      // small timeout to trigger enter transition
+      setTimeout(() => setIsVisible(true), 20);
+    } else {
+      setIsVisible(false);
+      setTimeout(() => setShouldRender(false), 300); // Match transition duration
+    }
+  }, [walletKitIsOpen]);
 
   const closeHandler = () => {
-    setWalletKitIsOpen(false); // Set modal to close
-  };
-
-  const chooseMethod = (method) => {
-    if (pending) {
-      return;
-    }
-    switch (method) {
-      case LoginTypes.walletKit:
-        WalletKitService.showWalletKitModal();
-        break;
-    }
+    setWalletKitIsOpen(false);
   };
 
   const handleDownload = (url) => {
     window.open(url, "_blank");
   };
 
-  if (!walletKitIsOpen) return null;
+  if (!shouldRender) return null;
+
   return (
     <div
       onClick={closeHandler}
       className="fixed inset-0 z-50 flex items-center justify-center px-2 py-5 sm:p-6 bg-gray-500/35"
     >
+      {/* Modal Panel */}
       <div
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        onClick={(e) => e.stopPropagation()}
         className={`w-full max-w-lg bg-white shadow-lg rounded-xl relative transform transition-all duration-300 ease-in-out ${
-          walletKitIsOpen
-            ? "translate-y-0 opacity-100"
-            : "translate-y-full opacity-0"
+          isVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
         }`}
       >
-        {/* Close Button */}
         <svg
           className="absolute w-5 text-gray-500 h-auto top-0 right-0 mt-4 mr-4 cursor-pointer"
           onClick={closeHandler} // Close on click
@@ -97,8 +89,15 @@ export default function WalletKitModal() {
               <div
                 onClick={() => {
                   isAvailableMap.get(option?.productName)
-                    ? WalletKitService.login(option?.productId)
+                    ? WalletKitService.login(
+                        option?.productId,
+                        setUserKey,
+                        setNetwork
+                      )
                     : handleDownload(option?.productUrl);
+                  setWalletKitIsOpen(false);
+
+                  setWalletApp(option?.productId);
                 }}
                 key={option?.productName}
                 className="overflow-hidden border border-gray-200 cursor-pointer bg-white shadow-sm rounded-xl transform transition-transform duration-300 hover:translate-x-1 hover:translate-y-1"
@@ -157,10 +156,74 @@ export default function WalletKitModal() {
               </div>
             ))}
           </div>
+
+          {/* <div className="mt-6 space-y-3">
+            {stellarWalletKitOptions?.map((option) => (
+              <div
+                key={option?.productName}
+                onClick={() => {
+                  isAvailableMap.get(option?.productName)
+                    ? WalletKitService.login(option?.productId)
+                    : handleDownload(option?.productUrl);
+                }}
+                className="overflow-hidden border border-gray-200 cursor-pointer bg-white shadow-sm rounded-xl transform transition-transform duration-300 hover:translate-x-1 hover:translate-y-1"
+              >
+                <div className="px-4 py-5 sm:p-6">
+                  <div className="flex items-center justify-between space-x-5">
+                    <div className="flex items-center flex-1">
+                      <img
+                        className="flex-shrink-0 object-cover w-10 h-10 rounded-full"
+                        src={option?.productIcon}
+                        alt=""
+                      />
+                      <div className="flex-1 min-w-0 ml-4">
+                        <p className="text-sm font-bold text-gray-900 truncate">
+                          {option?.productName}
+                        </p>
+                        <p className="mt-1 text-sm font-medium text-gray-500 truncate">
+                          {option?.productUrl}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end space-x-3">
+                      {!isAvailableMap?.get(option?.productName) ? (
+                        <svg
+                          className="w-6 h-auto text-gray-600"
+                          viewBox="0 0 32 32"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            clipRule="evenodd"
+                            d="M26 20V24C26 25.1046..."
+                            fill="currentColor"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="w-6 h-auto text-gray-600"
+                          viewBox="0 0 32 32"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            clipRule="evenodd"
+                            d="M18.6922 16L9.89742 7.20518..."
+                            fill="black"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div> */}
         </div>
       </div>
-
-      {/* Open Button for testing */}
     </div>
   );
 }

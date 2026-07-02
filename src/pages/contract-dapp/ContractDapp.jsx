@@ -5,6 +5,8 @@ import { useStates } from "../../contexts/StatesContext";
 import { Outlet, useLocation } from "react-router-dom";
 import BadgeButtons from "./components/BadgeButtons";
 import OutputModal from "../../components/OutputModal";
+import { Copy } from "iconsax-react";
+import { showSuccessToast } from "../../components/ToastComponent";
 
 export default function ContractDapp() {
   // interact | asset | contract | load
@@ -284,13 +286,37 @@ function WalletPanel({ isWalletConnected, connecting }) {
       </div>
 
       {isWalletConnected ? (
-        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-          <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Connected address
+        <div
+          onClick={async () => {
+            if (!userKey) return;
+
+            await navigator.clipboard.writeText(userKey);
+            showSuccessToast("Address copied");
+          }}
+          className="mt-5 flex cursor-pointer items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition hover:border-slate-300 hover:bg-slate-100"
+        >
+          <div className="min-w-0 flex-1">
+            <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Connected address
+            </div>
+
+            <div className="mt-1 truncate text-sm font-medium text-slate-900">
+              {maskKey(userKey, 10, 10, 6)}
+            </div>
           </div>
-          <div className="mt-1 break-all text-sm font-medium text-slate-900">
-            {maskKey(userKey, 10, 10, 6)}
-          </div>
+
+          <button
+            type="button"
+            className="ml-3 inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition hover:bg-white hover:text-slate-900"
+            title="Copy address"
+            onClick={async (e) => {
+              e.stopPropagation();
+              await navigator.clipboard.writeText(userKey);
+              showSuccessToast("Address copied");
+            }}
+          >
+            <Copy size="18" variant="Bulk" />
+          </button>
         </div>
       ) : (
         <button
